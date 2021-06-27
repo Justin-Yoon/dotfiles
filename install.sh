@@ -1,6 +1,9 @@
 #install zsh
 sudo apt install zsh
 
+#install git
+sudo apt install git
+
 # install oh-my-zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
