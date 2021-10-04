@@ -10,9 +10,11 @@ require('packer').startup(function()
   
   use {'navarasu/onedark.nvim'} -- Theme
   
+  -- TODO find out why this is not working
+  -- use {'justinmk/vim-sneak'}
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
   use {'tpope/vim-surround'}
-  
+
   use {'nvim-treesitter/nvim-treesitter'} 
   use {'neovim/nvim-lspconfig'} -- add lsp language config
   use 'hrsh7th/nvim-cmp' -- Autocompletion 
@@ -30,6 +32,8 @@ vim.opt.number=true -- line numbers
 vim.opt.scrolloff=1 -- leave space top / bottom
 vim.opt.hidden=true -- don't prompt save on changes
 vim.opt.mouse='a' -- use mouse
+vim.opt.breakindent=true -- wrapped lines indented correctly
+vim.opt.linebreak=true -- wrap lines at breakpoints
 
 -- Theme --
 require('onedark').setup()
@@ -86,7 +90,7 @@ vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<cr>', {noremap
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>gl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>gw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
--- vim.api.nvim_set_keymap('n', '<leader>c', ':Telescope commands<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>c', ':Telescope commands<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>gf', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
 
 -- nvim-cmp setup
