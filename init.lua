@@ -10,8 +10,7 @@ require('packer').startup(function()
   
   use {'navarasu/onedark.nvim'} -- Theme
   
-  -- TODO find out why this is not working
-  -- use {'justinmk/vim-sneak'}
+  use {'ggandor/lightspeed.nvim'}
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
   use {'tpope/vim-surround'}
 
@@ -34,6 +33,8 @@ vim.opt.hidden=true -- don't prompt save on changes
 vim.opt.mouse='a' -- use mouse
 vim.opt.breakindent=true -- wrapped lines indented correctly
 vim.opt.linebreak=true -- wrap lines at breakpoints
+vim.opt.inccommand='nosplit' -- show effect of command incrementally
+vim.opt.undofile=true -- show effect of command incrementally
 
 -- Theme --
 require('onedark').setup()
@@ -136,3 +137,4 @@ cmp.setup {
     -- { name = 'luasnip' },
   },
 }
+
