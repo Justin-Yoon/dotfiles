@@ -41,9 +41,19 @@ require('onedark').setup()
 
 -- Mapping
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
 
--- vim.api.vnim_set_keymap map <Space> <Leader>
--- nnoremap <leader>b :ls<CR>:b<Space>
+-- -- Quickfix List 
+-- vim.api.nvim_set_keymap('n', '<c-k>', ':cnext<cr>zz', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('n', '<c-j>', ':cprev<cr>zz', {noremap = false, silent=true})
+-- -- Location list 
+-- vim.api.nvim_set_keymap('n', '<leader>k', ':lnext<cR>zz', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>j', ':lprev<cR>zz', {noremap = false, silent=true})
 
 -- LSP
 local nvim_lsp = require('lspconfig')
