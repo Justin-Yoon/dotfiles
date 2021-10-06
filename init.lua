@@ -13,13 +13,18 @@ require('packer').startup(function()
   use {'ggandor/lightspeed.nvim'}
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
   use {'tpope/vim-surround'}
+  use {'tpope/vim-commentary'}
+  use {'tpope/vim-fugitive'}
+  use {'sbdchd/neoformat'}
+
 
   use {'nvim-treesitter/nvim-treesitter'} 
   use {'neovim/nvim-lspconfig'} -- add lsp language config
   use 'hrsh7th/nvim-cmp' -- Autocompletion 
   use 'hrsh7th/cmp-nvim-lsp' -- Source for nvim LSP client
   use {'kabouzeid/nvim-lspinstall'}
-
+  use 'saadparwaiz1/cmp_luasnip'
+  use 'L3MON4D3/LuaSnip' -- Snippets plugin
 end)
 
 vim.opt.expandtab=true -- use spaces
@@ -35,7 +40,7 @@ vim.opt.breakindent=true -- wrapped lines indented correctly
 vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
-
+vim.opt.completeopt='menu,menuone,noselect' -- FIGURE OUT WHAT THIS DOES`
 -- Theme --
 require('onedark').setup()
 
@@ -63,6 +68,7 @@ local on_attach = function(client, bufnr)
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
   local opts = { noremap=true, silent=true }
 
+  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
   buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
   buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
@@ -80,12 +86,17 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
   buf_set_keymap('n', '<space>fm', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+
 end
+
+-- nvim-cmp supports additional completion capabilities
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
 require'lspinstall'.setup()
 local servers = require'lspinstall'.installed_servers()
 for _, server in pairs(servers) do
-  require'lspconfig'[server].setup{ on_attach = on_attach, indent = { enable = true } }
+  require'lspconfig'[server].setup{ on_attach = on_attach, indent = { enable = true }, capabilities = capabilities }
 end
 
 -- TODO set up advanced lsp config (lspinstall docs)
@@ -99,52 +110,77 @@ highlight = { enable = true }, rainbow={ enable=true } })
 vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>gl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>gw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>c', ':Telescope commands<cr>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>gf', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>ff', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
+
+
+-- luasnip setup
+local luasnip = require 'luasnip'
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
 cmp.setup {
   snippet = {
-   --  expand = function(args)
-   --    require('luasnip').lsp_expand(args.body)
-   --  end,
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
   },
   mapping = {
-   --  ['<C-p>'] = cmp.mapping.select_prev_item(),
-   --  ['<C-n>'] = cmp.mapping.select_next_item(),
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-n>'] = cmp.mapping.select_next_item(),
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.close(),
     ['<CR>'] = cmp.mapping.confirm {
-    --  behavior = cmp.ConfirmBehavior.Replace,
+      behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    -- ['<Tab>'] = function(fallback)
-    --   if vim.fn.pumvisible() == 1 then
-    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
-    --   elseif luasnip.expand_or_jumpable() then
-    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
-    --   else
-    --     fallback()
-    --   end
-    -- end,
-    -- ['<S-Tab>'] = function(fallback)
-    --   if vim.fn.pumvisible() == 1 then
-    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
-    --   elseif luasnip.jumpable(-1) then
-    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
-    --   else
-    --     fallback()
-    --   end
-    -- end,
+    ['<Tab>'] = function(fallback)
+      if vim.fn.pumvisible() == 1 then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
+      elseif luasnip.expand_or_jumpable() then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
+      else
+        fallback()
+      end
+    end,
+    ['<S-Tab>'] = function(fallback)
+      if vim.fn.pumvisible() == 1 then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
+      elseif luasnip.jumpable(-1) then
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
+      else
+        fallback()
+      end
+    end,
   },
   sources = {
     { name = 'nvim_lsp' },
-    -- { name = 'luasnip' },
+    { name = 'luasnip' },
   },
 }
 
+-- Formatter
+vim.api.nvim_exec(
+  [[
+  augroup fmt
+    autocmd!
+    autocmd BufWritePre * undojoin | Neoformat
+  augroup END
+]],
+  false
+)
+
+-- Highlight on yank
+vim.api.nvim_exec(
+  [[
+  augroup YankHighlight
+    autocmd!
+    autocmd TextYankPost * silent! lua vim.highlight.on_yank()
+  augroup end
+]],
+  false
+)
