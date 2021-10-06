@@ -10,14 +10,18 @@ require('packer').startup(function()
   
   use {'navarasu/onedark.nvim'} -- Theme
   
+  -- Nav
   use {'ggandor/lightspeed.nvim'}
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
+  use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+
   use {'tpope/vim-surround'}
+  use {'tpope/vim-repeat'}
   use {'tpope/vim-commentary'}
   use {'tpope/vim-fugitive'}
   use {'sbdchd/neoformat'}
 
-
+  -- LSP + Syntax
   use {'nvim-treesitter/nvim-treesitter'} 
   use {'neovim/nvim-lspconfig'} -- add lsp language config
   use 'hrsh7th/nvim-cmp' -- Autocompletion 
@@ -48,17 +52,15 @@ require('onedark').setup()
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
 
--- -- Quickfix List 
--- vim.api.nvim_set_keymap('n', '<c-k>', ':cnext<cr>zz', {noremap = false, silent=true})
--- vim.api.nvim_set_keymap('n', '<c-j>', ':cprev<cr>zz', {noremap = false, silent=true})
--- -- Location list 
--- vim.api.nvim_set_keymap('n', '<leader>k', ':lnext<cR>zz', {noremap = false, silent=true})
--- vim.api.nvim_set_keymap('n', '<leader>j', ':lprev<cR>zz', {noremap = false, silent=true})
+-- Quickfix List 
+vim.api.nvim_set_keymap('n', '<c-j>', ':cnext<cr>zz', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<c-k>', ':cprev<cr>zz', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>cl', ':ccl<cr>', {noremap = false, silent=true})
+-- Location list 
+vim.api.nvim_set_keymap('n', '<leader>j', ':lnext<cR>zz', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>k', ':lprev<cR>zz', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>lc', ':lcl<cr>', {noremap = false, silent=true})
 
 -- LSP
 local nvim_lsp = require('lspconfig')
@@ -73,7 +75,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  buf_set_keymap('i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
@@ -98,6 +100,7 @@ local servers = require'lspinstall'.installed_servers()
 for _, server in pairs(servers) do
   require'lspconfig'[server].setup{ on_attach = on_attach, indent = { enable = true }, capabilities = capabilities }
 end
+require'lspconfig'.metals.setup{}
 
 -- TODO set up advanced lsp config (lspinstall docs)
 
@@ -106,13 +109,26 @@ local ts = require('nvim-treesitter.configs')
 ts.setup({--ensure_installed = 'maintained',
 highlight = { enable = true }, rainbow={ enable=true } })
 
--- Telescope TODO performance enhancements using fzf
+-- Telescope 
+require('telescope').setup {
+  extensions = {
+    fzf = {
+      fuzzy = true,                    -- false will only do exact matching
+      override_generic_sorter = true,  -- override the generic sorter
+      override_file_sorter = true,     -- override the file sorter
+      case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+                                       -- the default case_mode is "smart_case"
+    }
+  }
+}
+require('telescope').load_extension('fzf')
+
 vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>c', ':Telescope commands<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>cm', ':Telescope commands<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ff', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
 
 
