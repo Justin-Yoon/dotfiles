@@ -44,7 +44,7 @@ vim.opt.breakindent=true -- wrapped lines indented correctly
 vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
-vim.opt.completeopt='menu,menuone,noselect' -- FIGURE OUT WHAT THIS DOES`
+vim.opt.completeopt='menu,menuone,noselect'
 -- Theme --
 require('onedark').setup()
 
