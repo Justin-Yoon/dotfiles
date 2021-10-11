@@ -8,7 +8,7 @@ end
 require('packer').startup(function()
   use {'wbthomason/packer.nvim'} -- Plugin Manager
   
-  use {'navarasu/onedark.nvim'} -- Theme
+  use {'ful1e5/onedark.nvim'} -- Theme
   
   -- Nav
   use {'ggandor/lightspeed.nvim'}
@@ -37,6 +37,7 @@ vim.opt.shiftwidth=2 -- tab size
 vim.opt.ignorecase=true -- search ignore case 
 vim.opt.smartcase=true -- search case sensitive if capital in search
 vim.opt.number=true -- line numbers
+vim.opt.relativenumber=true -- relative numbers
 vim.opt.scrolloff=1 -- leave space top / bottom
 vim.opt.hidden=true -- don't prompt save on changes
 vim.opt.mouse='a' -- use mouse
@@ -46,7 +47,10 @@ vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
 vim.opt.completeopt='menu,menuone,noselect'
 -- Theme --
-require('onedark').setup()
+require("onedark").setup({
+  -- TODO figure out why this not working
+  highlight_linenumber = true,
+})
 
 -- Mapping
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
@@ -130,6 +134,9 @@ vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap 
 vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>cm', ':Telescope commands<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ff', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
+-- lsp telescope
+vim.api.nvim_set_keymap('n', '<leader>fs', ':Telescope lsp_document_symbols<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>ws', ':Telescope lsp_dynamic_workspace_symbols<cr>', {noremap = true, silent=true})
 
 
 -- luasnip setup
