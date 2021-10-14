@@ -61,6 +61,7 @@ vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<c-j>', ':cnext<cr>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<c-k>', ':cprev<cr>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>cl', ':ccl<cr>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>co', ':colder<cr>', {noremap = false, silent=true})
 -- Location list 
 vim.api.nvim_set_keymap('n', '<leader>j', ':lnext<cR>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>k', ':lprev<cR>zz', {noremap = false, silent=true})
@@ -127,12 +128,20 @@ require('telescope').setup {
 }
 require('telescope').load_extension('fzf')
 
-vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser<cr>', {noremap = true, silent=true})
+-- function file_browser()
+--   require'telescope.builtin'.file_browser({
+--     cwd = '<cmd>utils.buffer_dir()<CR>'
+--   })
+-- end
+
+-- vim.api.nvim_set_keymap('n', '<leader>fb', '<cmd>lua file_browser()<CR>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope find_browser<CR>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>cm', ':Telescope commands<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>ch', ':Telescope command_history<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ff', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
 -- lsp telescope
 vim.api.nvim_set_keymap('n', '<leader>fs', ':Telescope lsp_document_symbols<cr>', {noremap = true, silent=true})
@@ -161,24 +170,24 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    ['<Tab>'] = function(fallback)
-      if vim.fn.pumvisible() == 1 then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
-      elseif luasnip.expand_or_jumpable() then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
-      else
-        fallback()
-      end
-    end,
-    ['<S-Tab>'] = function(fallback)
-      if vim.fn.pumvisible() == 1 then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
-      elseif luasnip.jumpable(-1) then
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
-      else
-        fallback()
-      end
-    end,
+    -- ['<Tab>'] = function(fallback)
+    --   if vim.fn.pumvisible() == 1 then
+    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-n>', true, true, true), 'n')
+    --   elseif luasnip.expand_or_jumpable() then
+    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-expand-or-jump', true, true, true), '')
+    --   else
+    --     fallback()
+    --   end
+    -- end,
+    -- ['<S-Tab>'] = function(fallback)
+    --   if vim.fn.pumvisible() == 1 then
+    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<C-p>', true, true, true), 'n')
+    --   elseif luasnip.jumpable(-1) then
+    --     vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<Plug>luasnip-jump-prev', true, true, true), '')
+    --   else
+    --     fallback()
+    --   end
+    -- end,
   },
   sources = {
     { name = 'nvim_lsp' },
