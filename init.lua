@@ -56,6 +56,7 @@ require("onedark").setup({
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<c-l>', ':nohlsearch<cr> <c-l>', {noremap = false, silent=true}) -- remove search highlights
 
 -- Quickfix List 
 vim.api.nvim_set_keymap('n', '<c-j>', ':cnext<cr>zz', {noremap = false, silent=true})
