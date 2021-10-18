@@ -40,6 +40,7 @@ vim.opt.number=true -- line numbers
 vim.opt.relativenumber=true -- relative numbers
 vim.opt.scrolloff=1 -- leave space top / bottom
 vim.opt.hidden=true -- don't prompt save on changes
+vim.opt.cursorline=true -- highlight current line
 vim.opt.mouse='a' -- use mouse
 vim.opt.breakindent=true -- wrapped lines indented correctly
 vim.opt.linebreak=true -- wrap lines at breakpoints
@@ -48,8 +49,7 @@ vim.opt.undofile=true -- show effect of command incrementally
 vim.opt.completeopt='menu,menuone,noselect'
 -- Theme --
 require("onedark").setup({
-  -- TODO figure out why this not working
-  highlight_linenumber = true,
+  -- highlight_linenumber = true,
 })
 
 -- Mapping
@@ -82,9 +82,9 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
   buf_set_keymap('i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  -- buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  -- buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
