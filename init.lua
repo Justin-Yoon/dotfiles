@@ -47,6 +47,7 @@ vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
 vim.opt.completeopt='menu,menuone,noselect'
+vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true }) -- Yank until end of line (is on master 0.6?)
 -- Theme --
 require("onedark").setup({
   -- highlight_linenumber = true,
