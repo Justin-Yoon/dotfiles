@@ -29,6 +29,8 @@ require('packer').startup(function()
   use {'kabouzeid/nvim-lspinstall'}
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+
+  use 'kosayoda/nvim-lightbulb' -- lightbulb for code actions
 end)
 
 vim.opt.expandtab=true -- use spaces
@@ -47,6 +49,7 @@ vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
 vim.opt.completeopt='menu,menuone,noselect'
+vim.opt.updatetime=750
 vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true }) -- Yank until end of line (is on master 0.6?)
 -- Theme --
 require("onedark").setup({
@@ -102,14 +105,27 @@ end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
+-- TODO clean this up
 require'lspinstall'.setup()
-local servers = require'lspinstall'.installed_servers()
-for _, server in pairs(servers) do
-  require'lspconfig'[server].setup{ on_attach = on_attach, indent = { enable = true }, capabilities = capabilities }
-end
-require'lspconfig'.metals.setup{}
+-- local servers = require'lspinstall'.installed_servers()
+-- -- for _, server in pairs(servers) do
+--   require'lspconfig'[server].setup{ on_attach = on_attach, indent = { enable = true }, capabilities = capabilities }
+-- end
+lspconfig = require "lspconfig"
+  lspconfig.gopls.setup {
+    on_attach = on_attach,
+    capabilities = capabilities,
+    settings = {
+      gopls = {
+        buildFlags = {"-tags", "gen"},
+      },
+    },
+  }
 
--- TODO set up advanced lsp config (lspinstall docs)
+require'lspconfig'.metals.setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
+}
 
 -- Treesitter TODO fix failling downloads
 local ts = require('nvim-treesitter.configs')
@@ -168,6 +184,10 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.close(),
+    ['<Tab>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    },
     ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
@@ -218,3 +238,5 @@ vim.api.nvim_exec(
 ]],
   false
 )
+-- autocmd for lightbulb
+vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'nvim-lightbulb'.update_lightbulb()]]
