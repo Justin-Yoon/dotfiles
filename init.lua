@@ -49,8 +49,8 @@ vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
 vim.opt.completeopt='menu,menuone,noselect'
-vim.opt.updatetime=750
-vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true }) -- Yank until end of line (is on master 0.6?)
+vim.opt.updatetime=300 -- Update time for page refresh + audo cmd
+vim.opt.swapfile=false -- no swap files
 -- Theme --
 require("onedark").setup({
   -- highlight_linenumber = true,
@@ -71,6 +71,12 @@ vim.api.nvim_set_keymap('n', '<leader>co', ':colder<cr>', {noremap = false, sile
 vim.api.nvim_set_keymap('n', '<leader>j', ':lnext<cR>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>k', ':lprev<cR>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>lc', ':lcl<cr>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true }) -- Yank until end of line (is on master 0.6?)
+
+--Remap for dealing with word wrap
+vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
+vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
+
 
 -- LSP
 local nvim_lsp = require('lspconfig')
@@ -153,7 +159,7 @@ require('telescope').load_extension('fzf')
 -- end
 
 -- vim.api.nvim_set_keymap('n', '<leader>fb', '<cmd>lua file_browser()<CR>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope find_browser<CR>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser<CR>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
