@@ -26,7 +26,7 @@ require('packer').startup(function()
   use {'neovim/nvim-lspconfig'} -- add lsp language config
   use 'hrsh7th/nvim-cmp' -- Autocompletion 
   use 'hrsh7th/cmp-nvim-lsp' -- Source for nvim LSP client
-  use {'kabouzeid/nvim-lspinstall'}
+  use 'williamboman/nvim-lsp-installer'
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
@@ -49,7 +49,7 @@ vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
 vim.opt.completeopt='menu,menuone,noselect'
-vim.opt.updatetime=300 -- Update time for page refresh + audo cmd
+vim.opt.updatetime=500 -- Update time for page refresh + audo cmd
 vim.opt.swapfile=false -- no swap files
 -- Theme --
 require("onedark").setup({
@@ -111,27 +111,31 @@ end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 
--- TODO clean this up
-require'lspinstall'.setup()
--- local servers = require'lspinstall'.installed_servers()
--- -- for _, server in pairs(servers) do
---   require'lspconfig'[server].setup{ on_attach = on_attach, indent = { enable = true }, capabilities = capabilities }
--- end
-lspconfig = require "lspconfig"
-  lspconfig.gopls.setup {
-    on_attach = on_attach,
-    capabilities = capabilities,
-    settings = {
-      gopls = {
-        buildFlags = {"-tags", "gen"},
-      },
-    },
-  }
+local lsp_installer = require("nvim-lsp-installer")
 
-require'lspconfig'.metals.setup{
-  on_attach = on_attach,
-  capabilities = capabilities,
-}
+lsp_installer.on_server_ready(function(server)
+    local opts = {
+        on_attach = on_attach,
+        capabilities = capabilities,
+      }
+
+    -- (optional) Customize the options passed to the server
+    if server.name == "gopls" then
+      opts = {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+          gopls = {
+            buildFlags = {"-tags", "gen"},
+          },
+        },
+      }
+    end
+
+    -- This setup() function is exactly the same as lspconfig's setup function (:help lspconfig-quickstart)
+    server:setup(opts)
+    vim.cmd [[ do User LspAttachBuffers ]]
+end)
 
 -- Treesitter TODO fix failling downloads
 local ts = require('nvim-treesitter.configs')
