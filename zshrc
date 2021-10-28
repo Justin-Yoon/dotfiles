@@ -73,14 +73,16 @@ plugins=(
 git
 fzf
 fasd
+# fish-like suggestions as you type
 zsh-autosuggestions 
-history-substring-search
+# history-substring-search
 alias-tips
 zsh-completions 
 zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh
+autoload -U compinit && compinit
 
 # User configuration
 
