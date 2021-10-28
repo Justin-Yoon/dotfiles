@@ -95,7 +95,6 @@ source $ZSH/oh-my-zsh.sh
  else
    export EDITOR='/usr/local/bin/nvim'
  fi
-
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
@@ -110,43 +109,13 @@ source $ZSH/oh-my-zsh.sh
 
 alias slp="pmset sleepnow"
 export PATH=/usr/local/bin:$PATH
-
-# Env
-export GOPROXY="https://goproxy.tools.prod.movio.co,direct"
-export GONOSUMDB="github.com/movio/*"
-export PATH=/Users/justiny/go/bin:$PATH
-
-# NVM
-source $(brew --prefix nvm)/nvm.sh
-export NVM_DIR=~/.nvm
-
-
-# Android
-export ANDROID_HOME=/Users/justiny/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/tools 
-export PATH=$PATH:$ANDROID_HOME/tools/bin
-export PATH=$PATH/:$ANDROID_HOME/platform-tools
-
-##
-# AWS - Helper Functions
-##
-
-#source ~/.awsAliases
-#alias awsall="_awsListAll"
-#alias awslp="_awsListProfile"
-#alias awsp="_awsSwitchProfile"
-#alias awswho="aws configure list"
-
-# alias kdev="~/bin/kubectl160 --context=movio-dev --namespace=mm"
-# alias kusold="~/bin/kubectl152 --context=movio-prod-us --namespace=mm"
-# alias keuold="~/bin/kubectl175 --context=movio-prod-fr --namespace=mm"
-# alias keu="kubectl --context=k8s.eu.prod.movio.co --namespace=mm"
-# alias kcn="~/bin/kubectl175 --context=movio-prod-cn --namespace=mm"
-
-# alias kus="kubectl --context=k8s.us.prod.movio.co --namespace=mm"
-# alias iam="~/bin/iam"
+export PATH=$HOME/go/bin:$PATH
 
 source ~/Repos/bin/functions.sh
+if [ -f "$HOME/.dotfiles/zsh_local" ]
+then
+  source $HOME/.dotfiles/zsh_local
+fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
