@@ -9,7 +9,9 @@ require('packer').startup(function()
   use {'wbthomason/packer.nvim'} -- Plugin Manager
   
   use {'ful1e5/onedark.nvim'} -- Theme
-  
+  use 'folke/tokyonight.nvim'
+  use 'itchyny/lightline.vim'
+
   -- Nav
   use {'ggandor/lightspeed.nvim'}
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
@@ -23,6 +25,7 @@ require('packer').startup(function()
 
   -- LSP + Syntax
   use {'nvim-treesitter/nvim-treesitter'} 
+  use {'nvim-treesitter/nvim-treesitter-textobjects'} 
   use {'neovim/nvim-lspconfig'} -- add lsp language config
   use 'hrsh7th/nvim-cmp' -- Autocompletion 
   use 'hrsh7th/cmp-nvim-lsp' -- Source for nvim LSP client
@@ -49,12 +52,12 @@ vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true -- show effect of command incrementally
 vim.opt.completeopt='menu,menuone,noselect'
-vim.opt.updatetime=500 -- Update time for page refresh + audo cmd
+vim.opt.updatetime=750 -- Update time for page refresh + audo cmd
 vim.opt.swapfile=false -- no swap files
 -- Theme --
-require("onedark").setup({
-  -- highlight_linenumber = true,
-})
+-- vim.g.tokyonight_style = "day"
+-- vim.cmd[[colorscheme tokyonight]]
+vim.cmd[[colorscheme onedark]]
 
 -- Mapping
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
@@ -77,6 +80,10 @@ vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true }) -- Yank until end of
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
+-- Git
+vim.api.nvim_set_keymap('n', '<leader>gh', ':diffget //2<CR>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>gl', ':diffget //3<CR>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>gs', ':Gvdiffsplit!<CR>', {noremap = false, silent=true})
 
 -- LSP
 local nvim_lsp = require('lspconfig')
@@ -90,7 +97,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
   buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  -- buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
   buf_set_keymap('i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   -- buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
@@ -119,7 +126,6 @@ lsp_installer.on_server_ready(function(server)
         capabilities = capabilities,
       }
 
-    -- (optional) Customize the options passed to the server
     if server.name == "gopls" then
       opts = {
         on_attach = on_attach,
@@ -132,15 +138,52 @@ lsp_installer.on_server_ready(function(server)
       }
     end
 
-    -- This setup() function is exactly the same as lspconfig's setup function (:help lspconfig-quickstart)
     server:setup(opts)
     vim.cmd [[ do User LspAttachBuffers ]]
 end)
 
 -- Treesitter TODO fix failling downloads
 local ts = require('nvim-treesitter.configs')
-ts.setup({--ensure_installed = 'maintained',
-highlight = { enable = true }, rainbow={ enable=true } })
+ts.setup({
+  highlight = { enable = true },
+  indent = {
+    enable = true,
+  },
+  textobjects = {
+    select = {
+      enable = true,
+      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+      keymaps = {
+        -- You can use the capture groups defined in textobjects.scm
+        ['af'] = '@function.outer',
+        ['if'] = '@function.inner',
+        ["ac"] = "@class.outer",
+        ["ic"] = "@class.inner",
+      },
+    },
+    move = {
+      enable = true,
+      set_jumps = true, -- whether to set jumps in the jumplist
+      goto_next_start = {
+        [']m'] = '@function.outer',
+        [']]'] = '@class.outer',
+      },
+      goto_next_end = {
+        [']M'] = '@function.outer',
+        [']['] = '@class.outer',
+      },
+      goto_previous_start = {
+        ['[m'] = '@function.outer',
+        ['[['] = '@class.outer',
+      },
+      goto_previous_end = {
+        ['[M'] = '@function.outer',
+        ['[]'] = '@class.outer',
+      },
+    },
+  },
+  -- rainbow={ enable=true } 
+})
 
 -- Telescope 
 require('telescope').setup {
@@ -225,6 +268,19 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
   },
+}
+
+--Set statusbar
+vim.g.lightline = {
+  colorscheme = 'onedark',
+  active = {
+    left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'gitbranch', 'modified' } },
+    -- right = { { 'percent' } }
+  },
+  inactive = {
+    left = { { 'relativepath' } }
+  },
+  component_function = { gitbranch = 'fugitive#head' },
 }
 
 -- Formatter
