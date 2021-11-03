@@ -13,7 +13,11 @@ require('packer').startup(function()
   use 'itchyny/lightline.vim'
 
   -- Nav
-  use {'ggandor/lightspeed.nvim'}
+  use {
+  'phaazon/hop.nvim',
+  as = 'hop',
+  }
+
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
 
@@ -21,6 +25,7 @@ require('packer').startup(function()
   use {'tpope/vim-repeat'}
   use {'tpope/vim-commentary'}
   use {'tpope/vim-fugitive'}
+  use {'tpope/vim-vinegar'}
   use {'sbdchd/neoformat'}
 
   -- LSP + Syntax
@@ -55,7 +60,7 @@ vim.opt.completeopt='menu,menuone,noselect'
 vim.opt.updatetime=750 -- Update time for page refresh + audo cmd
 vim.opt.swapfile=false -- no swap files
 -- Theme --
--- vim.g.tokyonight_style = "day"
+-- vim.g.tokyonight_style = "night"
 -- vim.cmd[[colorscheme tokyonight]]
 vim.cmd[[colorscheme onedark]]
 
@@ -84,6 +89,10 @@ vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true,
 vim.api.nvim_set_keymap('n', '<leader>gh', ':diffget //2<CR>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>gl', ':diffget //3<CR>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>gs', ':Gvdiffsplit!<CR>', {noremap = false, silent=true})
+-- Hop
+vim.api.nvim_set_keymap('n', 's', ':HopWord<CR>', {noremap = false, silent=true})
+
+require'hop'.setup()
 
 -- LSP
 local nvim_lsp = require('lspconfig')
@@ -110,7 +119,8 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  buf_set_keymap('n', '<space>fm', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  -- buf_set_keymap('n', '<space>fm', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  buf_set_keymap('n', '<space>fm', ':Neoformat<CR>', opts)
 
 end
 
@@ -214,9 +224,10 @@ vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {norema
 vim.api.nvim_set_keymap('n', '<leader>cm', ':Telescope commands<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ch', ':Telescope command_history<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ff', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fr', ':Telescope registers<cr>', {noremap = true, silent=true})
 -- lsp telescope
 vim.api.nvim_set_keymap('n', '<leader>fs', ':Telescope lsp_document_symbols<cr>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>ws', ':Telescope lsp_dynamic_workspace_symbols<cr>', {noremap = true, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>ws', ':Telescope lsp_dynamic_workspace_symbols<cr>', {noremap = true, silent=true})
 
 
 -- luasnip setup
