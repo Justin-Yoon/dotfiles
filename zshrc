@@ -112,6 +112,7 @@ autoload -U compinit && compinit
 alias slp="pmset sleepnow"
 export PATH=/usr/local/bin:$PATH
 export PATH=$HOME/go/bin:$PATH
+alias tf="terraform"
 
 source ~/Repos/bin/functions.sh
 if [ -f "$HOME/.dotfiles/zsh_local" ]

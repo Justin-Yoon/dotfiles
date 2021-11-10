@@ -30,6 +30,7 @@ require('packer').startup(function()
   use {'tpope/vim-commentary'}
   use {'tpope/vim-fugitive'}
   use {'tpope/vim-vinegar'}
+  -- use {'cohama/lexima.vim'} -- auto close paranthesis, quotes etc
   use {'sbdchd/neoformat'}
 
   -- LSP + Syntax
@@ -43,6 +44,9 @@ require('packer').startup(function()
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
 
   use 'kosayoda/nvim-lightbulb' -- lightbulb for code actions
+
+
+  use 'dstein64/vim-startuptime'
 end)
 
 vim.opt.expandtab=true -- use spaces
@@ -59,7 +63,7 @@ vim.opt.mouse='a' -- use mouse
 vim.opt.breakindent=true -- wrapped lines indented correctly
 vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
-vim.opt.undofile=true -- show effect of command incrementally
+vim.opt.undofile=true 
 vim.opt.completeopt='menu,menuone,noselect'
 vim.opt.updatetime=750 -- Update time for page refresh + audo cmd
 vim.opt.swapfile=false -- no swap files
@@ -165,6 +169,12 @@ lsp_installer.on_server_ready(function(server)
     server:setup(opts)
     vim.cmd [[ do User LspAttachBuffers ]]
 end)
+
+-- require'lspconfig'.metals.setup{
+--   on_attach = on_attach,
+--   capabilities = capabilities,
+-- }
+
 
 -- Treesitter TODO fix failling downloads
 local ts = require('nvim-treesitter.configs')
