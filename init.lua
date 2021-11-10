@@ -47,6 +47,7 @@ require('packer').startup(function()
 
 
   use 'dstein64/vim-startuptime'
+  use 'knubie/vim-kitty-navigator'
 end)
 
 vim.opt.expandtab=true -- use spaces
@@ -81,8 +82,9 @@ vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<c-l>', ':nohlsearch<cr> <c-l>', {noremap = false, silent=true}) -- remove search highlights
 
 -- Quickfix List 
-vim.api.nvim_set_keymap('n', '<c-j>', ':cnext<cr>zz', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<c-k>', ':cprev<cr>zz', {noremap = false, silent=true})
+-- TODO figure these out (replaced by kitty nav)
+-- vim.api.nvim_set_keymap('n', '<c-j>', ':cnext<cr>zz', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('n', '<c-k>', ':cprev<cr>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>cl', ':ccl<cr>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>co', ':colder<cr>', {noremap = false, silent=true})
 -- Location list 
