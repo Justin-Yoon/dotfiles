@@ -31,7 +31,7 @@ require('packer').startup(function()
   use {'tpope/vim-fugitive'}
   use {'tpope/vim-vinegar'}
   -- use {'cohama/lexima.vim'} -- auto close paranthesis, quotes etc
-  use {'sbdchd/neoformat'}
+  use {'romainl/vim-cool'}
 
   -- LSP + Syntax
   use {'nvim-treesitter/nvim-treesitter'} 
@@ -42,6 +42,17 @@ require('packer').startup(function()
   use 'williamboman/nvim-lsp-installer'
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+
+
+  -- use 'jose-elias-alvarez/null-ls.nvim' -- Extend lsp (prettier)
+  use({ "jose-elias-alvarez/null-ls.nvim",
+    config = function()
+      require("null-ls").config({})
+      require("lspconfig")["null-ls"].setup({})
+    end,
+    requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}
+  })
+
 
   use 'kosayoda/nvim-lightbulb' -- lightbulb for code actions
 
@@ -79,7 +90,6 @@ vim.cmd[[colorscheme onedark]]
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<c-l>', ':nohlsearch<cr> <c-l>', {noremap = false, silent=true}) -- remove search highlights
 
 -- Quickfix List 
 -- TODO figure these out (replaced by kitty nav)
@@ -109,10 +119,14 @@ vim.api.nvim_set_keymap('n', 's', ':HopWord<CR>', {noremap = false, silent=true}
 
 require'hop'.setup()
 require'nvim-tree'.setup{
-  disable_netrw = false,
-  hijack_netrw = false,
+  update_focused_file = {
+    enable = true,
+  },
 }
 vim.api.nvim_set_keymap('n', '<C-n>', ':NvimTreeToggle<CR>', {noremap = false, silent=true})
+
+
+
 
 -- LSP
 local nvim_lsp = require('lspconfig')
@@ -134,15 +148,33 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  -- buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  -- buf_set_keymap('n', '<space>fm', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
-  buf_set_keymap('n', '<space>fm', ':Neoformat<CR>', opts)
+  buf_set_keymap('n', '<space>fm', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+
+  -- Telescope
+  buf_set_keymap('n', 'gr', ':Telescope lsp_references<cr>', opts)
+
+  if client.resolved_capabilities.document_formatting then
+    vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()")
+  end
 
 end
+
+-- Null LS
+local null_ls = require("null-ls")
+
+null_ls.config({
+  sources = { 
+    -- prereq npm install -g @fsouza/prettierd
+    null_ls.builtins.formatting.prettierd.with({
+        filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "css", "scss", "less", "html", "json" },
+    }),
+  }
+})
 
 -- nvim-cmp supports additional completion capabilities
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -151,26 +183,40 @@ capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 local lsp_installer = require("nvim-lsp-installer")
 
 lsp_installer.on_server_ready(function(server)
-    local opts = {
-        on_attach = on_attach,
-        capabilities = capabilities,
-      }
+  local opts = {
+    on_attach = on_attach,
+    capabilities = capabilities,
+  }
 
-    if server.name == "gopls" then
-      opts = {
-        on_attach = on_attach,
-        capabilities = capabilities,
-        settings = {
-          gopls = {
-            buildFlags = {"-tags", "gen"},
-          },
+  if server.name == "tsserver" then
+    opts = {
+      on_attach = function(client, bufnr)
+        -- Disable to make ls-null the default
+        client.resolved_capabilities.document_formatting = false
+        client.resolved_capabilities.document_range_formatting = false
+        vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()")
+        on_attach(client, bufnr)
+      end,
+      capabilities = capabilities,
+    }
+  end
+
+  if server.name == "gopls" then
+    opts = {
+      on_attach = on_attach,
+      capabilities = capabilities,
+      settings = {
+        gopls = {
+          buildFlags = {"-tags", "gen"},
         },
-      }
-    end
+      },
+    }
+  end
 
-    server:setup(opts)
-    vim.cmd [[ do User LspAttachBuffers ]]
+  server:setup(opts)
+  vim.cmd [[ do User LspAttachBuffers ]]
 end)
+
 
 -- require'lspconfig'.metals.setup{
 --   on_attach = on_attach,
@@ -320,17 +366,6 @@ vim.g.lightline = {
   },
   component_function = { gitbranch = 'fugitive#head' },
 }
-
--- Formatter
-vim.api.nvim_exec(
-  [[
-  augroup fmt
-    autocmd!
-    autocmd BufWritePre * undojoin | Neoformat
-  augroup END
-]],
-  false
-)
 
 -- Highlight on yank
 vim.api.nvim_exec(
