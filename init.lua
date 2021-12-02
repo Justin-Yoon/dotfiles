@@ -8,6 +8,7 @@ end
 require('packer').startup(function()
   use {'wbthomason/packer.nvim'} -- Plugin Manager
   
+  -- UI
   use {'ful1e5/onedark.nvim'} -- Theme
   use 'folke/tokyonight.nvim'
   use 'itchyny/lightline.vim'
@@ -18,6 +19,7 @@ require('packer').startup(function()
   as = 'hop',
   }
 
+  -- Telescope
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use {
@@ -29,9 +31,12 @@ require('packer').startup(function()
   use {'tpope/vim-repeat'}
   use {'tpope/vim-commentary'}
   use {'tpope/vim-fugitive'}
-  use {'tpope/vim-vinegar'}
+  use {'kdheepak/lazygit.nvim'}
+  use {'tpope/vim-vinegar'}   
+  use {'wellle/targets.vim'}   
   -- use {'cohama/lexima.vim'} -- auto close paranthesis, quotes etc
-  use {'romainl/vim-cool'}
+  use {'windwp/nvim-autopairs'}
+  use {'romainl/vim-cool'} -- turn off search hl when move
 
   -- LSP + Syntax
   use {'nvim-treesitter/nvim-treesitter'} 
@@ -61,6 +66,7 @@ require('packer').startup(function()
   use 'knubie/vim-kitty-navigator'
 end)
 
+vim.bo.filetype="on" -- enable plugin for lang specific settings
 vim.opt.expandtab=true -- use spaces
 vim.opt.tabstop=2 -- tab = 2 spaces
 vim.opt.shiftwidth=2 -- tab size
@@ -68,8 +74,6 @@ vim.opt.ignorecase=true -- search ignore case
 vim.opt.smartcase=true -- search case sensitive if capital in search
 vim.opt.number=true -- line numbers
 vim.opt.relativenumber=true -- relative numbers
-vim.opt.scrolloff=1 -- leave space top / bottom
-vim.opt.hidden=true -- don't prompt save on changes
 vim.opt.cursorline=true -- highlight current line
 vim.opt.mouse='a' -- use mouse
 vim.opt.breakindent=true -- wrapped lines indented correctly
@@ -77,7 +81,7 @@ vim.opt.linebreak=true -- wrap lines at breakpoints
 vim.opt.inccommand='nosplit' -- show effect of command incrementally
 vim.opt.undofile=true 
 vim.opt.completeopt='menu,menuone,noselect'
-vim.opt.updatetime=750 -- Update time for page refresh + audo cmd
+vim.opt.updatetime=300 -- Update time for page refresh + audo cmd
 vim.opt.swapfile=false -- no swap files
 vim.opt.splitright=true -- new split on the right
 vim.opt.splitbelow=true -- new split on the bottom
@@ -90,7 +94,8 @@ vim.cmd[[colorscheme onedark]]
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
-
+-- vim.api.nvim_set_keymap('t', 'kj', '<C-\\><C-n>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('i', 'kj', '<C-[>', {noremap = false, silent=true})
 -- Quickfix List 
 -- TODO figure these out (replaced by kitty nav)
 -- vim.api.nvim_set_keymap('n', '<c-j>', ':cnext<cr>zz', {noremap = false, silent=true})
@@ -101,18 +106,20 @@ vim.api.nvim_set_keymap('n', '<leader>co', ':colder<cr>', {noremap = false, sile
 vim.api.nvim_set_keymap('n', '<leader>j', ':lnext<cR>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>k', ':lprev<cR>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>lc', ':lcl<cr>', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', 'Y', 'y$', { noremap = true }) -- Yank until end of line (is on master 0.6?)
 
 --Remap for dealing with word wrap
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
 -- Git
-vim.api.nvim_set_keymap('n', '<leader>gh', ':diffget //2<CR>', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>gl', ':diffget //3<CR>', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>gs', ':Gvdiffsplit!<CR>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>gs', ':LazyGit<CR>', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>gh', ':diffget //2<CR>', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>gl', ':diffget //3<CR>', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>gs', ':Gvdiffsplit!<CR>', {noremap = false, silent=true})
 -- Hop
 vim.api.nvim_set_keymap('n', 's', ':HopWord<CR>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<C-F>', "<cmd>lua require'hop'.hint_char1({ inclusive_jump = true })<cr>", {})
+vim.api.nvim_set_keymap('o', '<C-F>', "<cmd>lua require'hop'.hint_char1({ inclusive_jump = true })<cr>", {})
 -- vim.api.nvim_set_keymap('n', 'f', "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR })<cr>", {})
 -- vim.api.nvim_set_keymap('n', 'F', "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR })<cr>", {})
 
@@ -239,6 +246,15 @@ end)
 --   capabilities = capabilities,
 -- }
 
+local npairs = require("nvim-autopairs");
+npairs.setup({
+    -- check_ts = true,
+    -- ts_config = {
+    --     lua = {'string'},-- it will not add a pair on that treesitter node
+    --     javascript = {'template_string'},
+    --     java = false,-- don't check treesitter on java
+    -- }
+})
 
 -- Treesitter TODO fix failling downloads
 local ts = require('nvim-treesitter.configs')
@@ -312,8 +328,10 @@ vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {norema
 vim.api.nvim_set_keymap('n', '<leader>cm', ':Telescope commands<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ch', ':Telescope command_history<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ff', ':Telescope current_buffer_fuzzy_find<cr>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>fr', ':Telescope registers<cr>', {noremap = true, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>fr', ':Telescope registers<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fk', ':Telescope marks<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fo', ':Telescope oldfiles<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fr', ':Telescope resume<cr>', {noremap = true, silent=true})
 -- lsp telescope
 vim.api.nvim_set_keymap('n', '<leader>fs', ':Telescope lsp_document_symbols<cr>', {noremap = true, silent=true})
 -- vim.api.nvim_set_keymap('n', '<leader>ws', ':Telescope lsp_dynamic_workspace_symbols<cr>', {noremap = true, silent=true})
