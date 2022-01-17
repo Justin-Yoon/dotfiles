@@ -22,6 +22,7 @@ require('packer').startup(function()
   -- Telescope
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  use { "nvim-telescope/telescope-file-browser.nvim" }
   use {
     'kyazdani42/nvim-tree.lua',
     requires = 'kyazdani42/nvim-web-devicons',
@@ -35,8 +36,10 @@ require('packer').startup(function()
   use {'tpope/vim-vinegar'}   
   use {'wellle/targets.vim'}   
   -- use {'cohama/lexima.vim'} -- auto close paranthesis, quotes etc
-  use {'windwp/nvim-autopairs'}
+  use {'windwp/nvim-autopairs'} -- auto close parens
+  use {'windwp/nvim-ts-autotag'} -- auto close tags eg <div></div>
   use {'romainl/vim-cool'} -- turn off search hl when move
+	use {'iamcco/markdown-preview.nvim', run = 'cd app && yarn install'}
 
   -- LSP + Syntax
   use {'nvim-treesitter/nvim-treesitter'} 
@@ -47,14 +50,16 @@ require('packer').startup(function()
   use 'williamboman/nvim-lsp-installer'
   use 'saadparwaiz1/cmp_luasnip'
   use 'L3MON4D3/LuaSnip' -- Snippets plugin
+  use "rafamadriz/friendly-snippets"
+  use "ray-x/lsp_signature.nvim" -- show function signature when typing
 
 
   -- use 'jose-elias-alvarez/null-ls.nvim' -- Extend lsp (prettier)
   use({ "jose-elias-alvarez/null-ls.nvim",
-    config = function()
-      require("null-ls").config({})
-      require("lspconfig")["null-ls"].setup({})
-    end,
+    -- config = function()
+    --   require("null-ls").setup({})
+    --   require("lspconfig")["null-ls"].setup({})
+    -- end,
     requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}
   })
 
@@ -98,8 +103,8 @@ vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('i', 'kj', '<C-[>', {noremap = false, silent=true})
 -- Quickfix List 
 -- TODO figure these out (replaced by kitty nav)
--- vim.api.nvim_set_keymap('n', '<c-j>', ':cnext<cr>zz', {noremap = false, silent=true})
--- vim.api.nvim_set_keymap('n', '<c-k>', ':cprev<cr>zz', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<c-n>', ':cnext<cr>zz', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<c-p>', ':cprev<cr>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>cl', ':ccl<cr>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>co', ':colder<cr>', {noremap = false, silent=true})
 -- Location list 
@@ -112,14 +117,14 @@ vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true,
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
 -- Git
-vim.api.nvim_set_keymap('n', '<leader>gs', ':LazyGit<CR>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>lg', ':LazyGit<CR>', {noremap = false, silent=true})
 -- vim.api.nvim_set_keymap('n', '<leader>gh', ':diffget //2<CR>', {noremap = false, silent=true})
 -- vim.api.nvim_set_keymap('n', '<leader>gl', ':diffget //3<CR>', {noremap = false, silent=true})
 -- vim.api.nvim_set_keymap('n', '<leader>gs', ':Gvdiffsplit!<CR>', {noremap = false, silent=true})
 -- Hop
-vim.api.nvim_set_keymap('n', 's', ':HopWord<CR>', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<C-F>', "<cmd>lua require'hop'.hint_char1({ inclusive_jump = true })<cr>", {})
-vim.api.nvim_set_keymap('o', '<C-F>', "<cmd>lua require'hop'.hint_char1({ inclusive_jump = true })<cr>", {})
+vim.api.nvim_set_keymap('n', 's', "<cmd>lua require'hop'.hint_words()<cr>", {noremap = false, silent=true})
+vim.api.nvim_set_keymap('', '<C-S>', "<cmd>lua require'hop'.hint_words()<cr>", {noremap = false, silent=true})
+vim.api.nvim_set_keymap('', '<C-F>', "<cmd>lua require'hop'.hint_char1({ inclusive_jump = true })<cr>", {})
 -- vim.api.nvim_set_keymap('n', 'f', "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR })<cr>", {})
 -- vim.api.nvim_set_keymap('n', 'F', "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR })<cr>", {})
 
@@ -130,7 +135,7 @@ require'nvim-tree'.setup{
     enable = true,
   },
 }
-vim.api.nvim_set_keymap('n', '<C-n>', ':NvimTreeToggle<CR>', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>t', ':NvimTreeToggle<CR>', {noremap = false, silent=true})
 
 -- LSP
 local nvim_lsp = require('lspconfig')
@@ -161,8 +166,8 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
   -- buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<C-s>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('i', '<C-s>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  -- buf_set_keymap('n', '<C-s>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  -- buf_set_keymap('i', '<C-s>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   -- buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   -- buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
@@ -186,18 +191,6 @@ local on_attach = function(client, bufnr)
   end
 
 end
-
--- Null LS
-local null_ls = require("null-ls")
-
-null_ls.config({
-  sources = { 
-    -- prereq npm install -g @fsouza/prettierd
-    null_ls.builtins.formatting.prettierd.with({
-        filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "css", "scss", "less", "html", "json" },
-    }),
-  }
-})
 
 -- nvim-cmp supports additional completion capabilities
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -241,10 +234,24 @@ lsp_installer.on_server_ready(function(server)
 end)
 
 
+require "lsp_signature".setup()
+
 -- require'lspconfig'.metals.setup{
 --   on_attach = on_attach,
 --   capabilities = capabilities,
 -- }
+-- Null LS
+local null_ls = require("null-ls")
+
+null_ls.setup({
+  sources = { 
+    -- prereq npm install -g @fsouza/prettierd
+    null_ls.builtins.formatting.prettierd.with({
+        filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "css", "scss", "less", "html", "json" },
+    }),
+  }
+})
+
 
 local npairs = require("nvim-autopairs");
 npairs.setup({
@@ -261,6 +268,9 @@ local ts = require('nvim-treesitter.configs')
 ts.setup({
   highlight = { enable = true },
   indent = {
+    enable = true,
+  },
+  autotag = {
     enable = true,
   },
   textobjects = {
@@ -301,6 +311,12 @@ ts.setup({
 
 -- Telescope 
 require('telescope').setup {
+  pickers = {
+    -- show gitignore (issue with showing .git files)
+    -- find_files = {
+    --   hidden = true,
+    -- }
+  },
   extensions = {
     fzf = {
       fuzzy = true,                    -- false will only do exact matching
@@ -312,16 +328,11 @@ require('telescope').setup {
   }
 }
 require('telescope').load_extension('fzf')
+require("telescope").load_extension "file_browser"
 
--- function file_browser()
---   require'telescope.builtin'.file_browser({
---     cwd = '<cmd>utils.buffer_dir()<CR>'
---   })
--- end
-
--- vim.api.nvim_set_keymap('n', '<leader>fb', '<cmd>lua file_browser()<CR>', {noremap = true, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>fb', require 'telescope'.extensions.file_browser.file_browser, {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser<CR>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<CR>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
@@ -335,10 +346,12 @@ vim.api.nvim_set_keymap('n', '<leader>fr', ':Telescope resume<cr>', {noremap = t
 -- lsp telescope
 vim.api.nvim_set_keymap('n', '<leader>fs', ':Telescope lsp_document_symbols<cr>', {noremap = true, silent=true})
 -- vim.api.nvim_set_keymap('n', '<leader>ws', ':Telescope lsp_dynamic_workspace_symbols<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fd', ':Telescope diagnostics<cr>', {noremap = true, silent=true})
 
 
 -- luasnip setup
 local luasnip = require 'luasnip'
+require("luasnip/loaders/from_vscode").lazy_load()
 
 -- nvim-cmp setup
 local cmp = require 'cmp'

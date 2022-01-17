@@ -1,7 +1,6 @@
 vim.cmd [[packadd hop]]
 
-vim.opt.number=true -- line numbers
-vim.opt.relativenumber=true -- relative numbers
+vim.opt.number=false -- line numbers
 vim.opt.cursorline=true -- highlight current line
 vim.opt.mouse='a' -- use mouse
 vim.opt.clipboard='unnamedplus'

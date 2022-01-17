@@ -39,6 +39,11 @@ alias lg="lazygit"
 export PATH=/usr/local/bin:$PATH
 export PATH=$HOME/go/bin:$PATH
 alias tf="terraform"
+alias note='nvim -c "+normal Go* " +startinsert! ~/Dropbox/Documents/notes.md'
+# alias todo='nvim -c "normal /Uncategorisedo$(date +%F) " +startinsert! ~/Dropbox/Documents/todo.md'
+alias todo='nvim -c "normal /TODOSkO" +startinsert! ~/Dropbox/Documents/todo.md'
+alias study='nvim ~/Dropbox/Documents/study.md'
+alias tools='nvim ~/Dropbox/Documents/tools.md'
 
 source ~/Repos/bin/functions.sh
 if [ -f "$HOME/.dotfiles/zsh_local" ]
