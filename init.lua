@@ -62,6 +62,32 @@ require('packer').startup(function()
     -- end,
     requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}
   })
+  -- TODO figure out why this doesnt work
+  use {
+  'abecodes/tabout.nvim',
+  config = function()
+    require('tabout').setup {
+    tabkey = '<Tab>', -- key to trigger tabout, set to an empty string to disable
+    backwards_tabkey = '<S-Tab>', -- key to trigger backwards tabout, set to an empty string to disable
+    act_as_tab = true, -- shift content if tab out is not possible
+    act_as_shift_tab = false, -- reverse shift content if tab out is not possible (if your keyboard/terminal supports <S-Tab>)
+    enable_backwards = true,
+    completion = true, -- if the tabkey is used in a completion pum
+    tabouts = {
+      {open = "'", close = "'"},
+      {open = '"', close = '"'},
+      {open = '`', close = '`'},
+      {open = '(', close = ')'},
+      {open = '[', close = ']'},
+      {open = '{', close = '}'}
+    },
+    ignore_beginning = true, --[[ if the cursor is at the beginning of a filled element it will rather tab out than shift the content ]]
+    exclude = {} -- tabout will ignore these filetypes
+}
+  end,
+	wants = {'nvim-treesitter'}, -- or require if not used so far
+	after = {'nvim-cmp'} -- if a completion plugin is using tabs load it before
+}
 
 
   use 'kosayoda/nvim-lightbulb' -- lightbulb for code actions
@@ -99,8 +125,6 @@ vim.cmd[[colorscheme onedark]]
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
--- vim.api.nvim_set_keymap('t', 'kj', '<C-\\><C-n>', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('i', 'kj', '<C-[>', {noremap = false, silent=true})
 -- Quickfix List 
 -- TODO figure these out (replaced by kitty nav)
 vim.api.nvim_set_keymap('n', '<c-n>', ':cnext<cr>zz', {noremap = false, silent=true})
@@ -165,16 +189,14 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
   buf_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
   buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  -- buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
   -- buf_set_keymap('n', '<C-s>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  -- buf_set_keymap('i', '<C-s>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
   -- buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   -- buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   -- buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  -- buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
   buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
@@ -182,7 +204,7 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<space>fm', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
 
   -- Telescope
-  buf_set_keymap('n', 'gr', ':Telescope lsp_references<cr>', opts)
+  -- buf_set_keymap('n', 'gr', ':Telescope lsp_references<cr>', opts)
   buf_set_keymap('n', 'gi', ':Telescope lsp_implementations<cr>', opts)
 
     vim.cmd("autocmd BufWritePre *.go lua org_imports(1500)")
@@ -224,6 +246,7 @@ lsp_installer.on_server_ready(function(server)
       settings = {
         gopls = {
           buildFlags = {"-tags", "gen"},
+          buildFlags = {"-tags", "windows"},
         },
       },
     }
@@ -331,7 +354,7 @@ require('telescope').load_extension('fzf')
 require("telescope").load_extension "file_browser"
 
 -- vim.api.nvim_set_keymap('n', '<leader>fb', require 'telescope'.extensions.file_browser.file_browser, {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser<CR>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser path=%:p:h<CR>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<CR>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
@@ -368,12 +391,12 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.close(),
-    ['<Tab>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    },
+    -- ['<Tab>'] = cmp.mapping.confirm {
+    --   -- behavior = cmp.ConfirmBehavior.Replace,
+    --   select = true,
+    -- },
     ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
+      -- behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
     -- ['<Tab>'] = function(fallback)
@@ -405,11 +428,11 @@ cmp.setup {
 vim.g.lightline = {
   colorscheme = 'onedark',
   active = {
-    left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'gitbranch', 'modified' } },
+    left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'modified' } },
     right = { { 'percent' } }
   },
   inactive = {
-    left = { { 'relativepath' } }
+    left = { { 'relativepath', 'modified' } }
   },
   component_function = { gitbranch = 'fugitive#head' },
 }
