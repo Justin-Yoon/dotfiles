@@ -44,6 +44,8 @@ require('packer').startup(function()
   -- LSP + Syntax
   use {'nvim-treesitter/nvim-treesitter'} 
   use {'nvim-treesitter/nvim-treesitter-textobjects'} 
+  use {'nvim-treesitter/nvim-treesitter-refactor'} -- for highlighting word on page, not using the refactoring
+  -- use {'nvim-treesitter/nvim-treesitter-context'}
   use {'neovim/nvim-lspconfig'} -- add lsp language config
   use 'hrsh7th/nvim-cmp' -- Autocompletion 
   use 'hrsh7th/cmp-nvim-lsp' -- Source for nvim LSP client
@@ -62,7 +64,6 @@ require('packer').startup(function()
     -- end,
     requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}
   })
-  -- TODO figure out why this doesnt work
   use {
   'abecodes/tabout.nvim',
   config = function()
@@ -81,16 +82,13 @@ require('packer').startup(function()
       {open = '[', close = ']'},
       {open = '{', close = '}'}
     },
-    ignore_beginning = true, --[[ if the cursor is at the beginning of a filled element it will rather tab out than shift the content ]]
+    ignore_beginning = false, --[[ if the cursor is at the beginning of a filled element it will rather tab out than shift the content ]]
     exclude = {} -- tabout will ignore these filetypes
 }
   end,
 	wants = {'nvim-treesitter'}, -- or require if not used so far
 	after = {'nvim-cmp'} -- if a completion plugin is using tabs load it before
 }
-
-
-  use 'kosayoda/nvim-lightbulb' -- lightbulb for code actions
 
 
   use 'dstein64/vim-startuptime'
@@ -140,6 +138,8 @@ vim.api.nvim_set_keymap('n', '<leader>lc', ':lcl<cr>', {noremap = false, silent=
 vim.api.nvim_set_keymap('n', 'k', "v:count == 0 ? 'gk' : 'k'", { noremap = true, expr = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', "v:count == 0 ? 'gj' : 'j'", { noremap = true, expr = true, silent = true })
 
+-- vim.api.nvim_set_keymap('n', 'j', ":nohlsearch<cr>j", { noremap = false, expr = true, silent = true })
+
 -- Git
 vim.api.nvim_set_keymap('n', '<leader>lg', ':LazyGit<CR>', {noremap = false, silent=true})
 -- vim.api.nvim_set_keymap('n', '<leader>gh', ':diffget //2<CR>', {noremap = false, silent=true})
@@ -163,22 +163,6 @@ vim.api.nvim_set_keymap('n', '<leader>t', ':NvimTreeToggle<CR>', {noremap = fals
 
 -- LSP
 local nvim_lsp = require('lspconfig')
-
--- TODO remove this when neovim lsp can handle "source.organizeImports"
-function org_imports(wait_ms)
-  local params = vim.lsp.util.make_range_params()
-  params.context = {only = {"source.organizeImports"}}
-  local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
-  for _, res in pairs(result or {}) do
-    for _, r in pairs(res.result or {}) do
-      if r.edit then
-        vim.lsp.util.apply_workspace_edit(r.edit)
-      else
-        vim.lsp.buf.execute_command(r.command)
-      end
-    end
-  end
-end
 
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -205,9 +189,30 @@ local on_attach = function(client, bufnr)
 
   -- Telescope
   -- buf_set_keymap('n', 'gr', ':Telescope lsp_references<cr>', opts)
-  buf_set_keymap('n', 'gi', ':Telescope lsp_implementations<cr>', opts)
+  buf_set_keymap('n', 'gI', ':Telescope lsp_implementations<cr>', opts)
 
-    vim.cmd("autocmd BufWritePre *.go lua org_imports(1500)")
+-- TODO remove this when neovim lsp can handle "source.organizeImports"
+  function organise_imports() 
+    local params = vim.lsp.util.make_range_params(nil, "utf-16")
+    params.context = {only = {"source.organizeImports"}}
+    local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 1500)
+    for _, res in pairs(result or {}) do
+      for _, r in pairs(res.result or {}) do
+        if r.edit then
+          vim.lsp.util.apply_workspace_edit(r.edit, "utf-16")
+        else
+          vim.lsp.buf.execute_command(r.command)
+        end
+      end
+    end
+  end
+
+
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = { "*.go" },
+    callback = organise_imports,
+  })
+    -- vim.cmd("autocmd BufWritePre *.go lua org_imports(1500)")
   if client.resolved_capabilities.document_formatting then
     vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()")
   end
@@ -245,8 +250,9 @@ lsp_installer.on_server_ready(function(server)
       capabilities = capabilities,
       settings = {
         gopls = {
-          buildFlags = {"-tags", "gen"},
-          buildFlags = {"-tags", "windows"},
+          buildFlags = {"-tags=windows"},
+          -- buildFlags = {"-tags=windows"},
+          -- buildFlags = {"-tags=!windows"},
         },
       },
     }
@@ -332,6 +338,19 @@ ts.setup({
   -- rainbow={ enable=true } 
 })
 
+require'nvim-treesitter.configs'.setup {
+  refactor = {
+    highlight_definitions = {
+      enable = true,
+      -- Set to false if you have an `updatetime` of ~100.
+      clear_on_cursor_move = true,
+    },
+  },
+}
+
+-- require'treesitter-context'.setup()
+
+
 -- Telescope 
 require('telescope').setup {
   pickers = {
@@ -385,6 +404,8 @@ cmp.setup {
     end,
   },
   mapping = {
+    ['<Up>'] = cmp.mapping.select_prev_item(),
+    ['<Down>'] = cmp.mapping.select_next_item(),
     ['<C-p>'] = cmp.mapping.select_prev_item(),
     ['<C-n>'] = cmp.mapping.select_next_item(),
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
@@ -425,17 +446,17 @@ cmp.setup {
 }
 
 --Set statusbar
-vim.g.lightline = {
-  colorscheme = 'onedark',
-  active = {
-    left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'modified' } },
-    right = { { 'percent' } }
-  },
-  inactive = {
-    left = { { 'relativepath', 'modified' } }
-  },
-  component_function = { gitbranch = 'fugitive#head' },
-}
+-- vim.g.lightline = {
+--   colorscheme = 'onedark',
+--   active = {
+--     left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'modified' } },
+--     right = { { 'percent' } }
+--   },
+--   inactive = {
+--     left = { { 'relativepath', 'modified' } }
+--   },
+  -- component_function = { gitbranch = 'fugitive#head' },
+-- }
 
 -- Highlight on yank
 vim.api.nvim_exec(
@@ -447,5 +468,4 @@ vim.api.nvim_exec(
 ]],
   false
 )
--- autocmd for lightbulb
-vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'nvim-lightbulb'.update_lightbulb()]]
+
