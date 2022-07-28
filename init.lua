@@ -26,7 +26,17 @@ require('packer').startup(function()
   use {
     'kyazdani42/nvim-tree.lua',
     requires = 'kyazdani42/nvim-web-devicons',
-}
+  }
+
+  use 'chentoast/marks.nvim'
+  -- TODO figure out why this isn't working
+  use {
+    "folke/which-key.nvim",
+    config = function()
+      require("which-key").setup {
+      }
+    end
+  }
 
   use {'tpope/vim-surround'}
   use {'tpope/vim-repeat'}
@@ -35,10 +45,10 @@ require('packer').startup(function()
   use {'kdheepak/lazygit.nvim'}
   use {'tpope/vim-vinegar'}   
   use {'wellle/targets.vim'}   
-  -- use {'cohama/lexima.vim'} -- auto close paranthesis, quotes etc
   use {'windwp/nvim-autopairs'} -- auto close parens
   use {'windwp/nvim-ts-autotag'} -- auto close tags eg <div></div>
-  use {'romainl/vim-cool'} -- turn off search hl when move
+  -- use {'romainl/vim-cool'} -- turn off search hl when move
+  use {'kevinhwang91/nvim-hlslens'}
 	use {'iamcco/markdown-preview.nvim', run = 'cd app && yarn install'}
 
   -- LSP + Syntax
@@ -56,35 +66,17 @@ require('packer').startup(function()
   use "ray-x/lsp_signature.nvim" -- show function signature when typing
 
 
-  -- use 'jose-elias-alvarez/null-ls.nvim' -- Extend lsp (prettier)
   use({ "jose-elias-alvarez/null-ls.nvim",
-    -- config = function()
-    --   require("null-ls").setup({})
-    --   require("lspconfig")["null-ls"].setup({})
-    -- end,
+    config = function()
+      require("null-ls").setup({})
+      require("lspconfig")["null-ls"].setup({})
+    end,
     requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}
   })
   use {
   'abecodes/tabout.nvim',
   config = function()
-    require('tabout').setup {
-    tabkey = '<Tab>', -- key to trigger tabout, set to an empty string to disable
-    backwards_tabkey = '<S-Tab>', -- key to trigger backwards tabout, set to an empty string to disable
-    act_as_tab = true, -- shift content if tab out is not possible
-    act_as_shift_tab = false, -- reverse shift content if tab out is not possible (if your keyboard/terminal supports <S-Tab>)
-    enable_backwards = true,
-    completion = true, -- if the tabkey is used in a completion pum
-    tabouts = {
-      {open = "'", close = "'"},
-      {open = '"', close = '"'},
-      {open = '`', close = '`'},
-      {open = '(', close = ')'},
-      {open = '[', close = ']'},
-      {open = '{', close = '}'}
-    },
-    ignore_beginning = false, --[[ if the cursor is at the beginning of a filled element it will rather tab out than shift the content ]]
-    exclude = {} -- tabout will ignore these filetypes
-}
+    require('tabout').setup {}
   end,
 	wants = {'nvim-treesitter'}, -- or require if not used so far
 	after = {'nvim-cmp'} -- if a completion plugin is using tabs load it before
@@ -114,15 +106,19 @@ vim.opt.updatetime=300 -- Update time for page refresh + audo cmd
 vim.opt.swapfile=false -- no swap files
 vim.opt.splitright=true -- new split on the right
 vim.opt.splitbelow=true -- new split on the bottom
+vim.o.clipboard = 'unnamedplus'
 -- Theme --
 -- vim.g.tokyonight_style = "night"
 -- vim.cmd[[colorscheme tokyonight]]
 vim.cmd[[colorscheme onedark]]
 
+
 -- Mapping
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
-vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
+-- vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', 'x', '"_x', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', 'c', '"_c', {noremap = true, silent=true})
 -- Quickfix List 
 -- TODO figure these out (replaced by kitty nav)
 vim.api.nvim_set_keymap('n', '<c-n>', ':cnext<cr>zz', {noremap = false, silent=true})
@@ -152,6 +148,23 @@ vim.api.nvim_set_keymap('', '<C-F>', "<cmd>lua require'hop'.hint_char1({ inclusi
 -- vim.api.nvim_set_keymap('n', 'f', "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.AFTER_CURSOR })<cr>", {})
 -- vim.api.nvim_set_keymap('n', 'F', "<cmd>lua require'hop'.hint_char1({ direction = require'hop.hint'.HintDirection.BEFORE_CURSOR })<cr>", {})
 
+-- nvim-hlsens
+vim.api.nvim_set_keymap('n', 'n',
+    [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]],
+    {noremap = false, silent = true})
+vim.api.nvim_set_keymap('n', 'N',
+    [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]],
+    {noremap = false, silent = true})
+vim.api.nvim_set_keymap('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], {noremap = false, silent = true})
+vim.api.nvim_set_keymap('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], {noremap = false, silent = true})
+vim.api.nvim_set_keymap('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], {noremap = false, silent = true})
+vim.api.nvim_set_keymap('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], {noremap = false, silent = true})
+
+
+require('hlslens').setup({
+  calm_down = true,
+  nearest_only = true
+})
 
 require'hop'.setup()
 require'nvim-tree'.setup{
@@ -390,6 +403,9 @@ vim.api.nvim_set_keymap('n', '<leader>fs', ':Telescope lsp_document_symbols<cr>'
 -- vim.api.nvim_set_keymap('n', '<leader>ws', ':Telescope lsp_dynamic_workspace_symbols<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fd', ':Telescope diagnostics<cr>', {noremap = true, silent=true})
 
+require'marks'.setup {
+
+}
 
 -- luasnip setup
 local luasnip = require 'luasnip'
@@ -446,17 +462,17 @@ cmp.setup {
 }
 
 --Set statusbar
--- vim.g.lightline = {
---   colorscheme = 'onedark',
---   active = {
---     left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'modified' } },
---     right = { { 'percent' } }
---   },
---   inactive = {
---     left = { { 'relativepath', 'modified' } }
---   },
-  -- component_function = { gitbranch = 'fugitive#head' },
--- }
+vim.g.lightline = {
+  colorscheme = 'onedark',
+  active = {
+    left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'modified' } },
+    right = { { 'percent' } }
+  },
+  inactive = {
+    left = { { 'relativepath', 'modified' } }
+  },
+  component_function = { gitbranch = 'fugitive#head' },
+}
 
 -- Highlight on yank
 vim.api.nvim_exec(

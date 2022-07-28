@@ -18,6 +18,9 @@ zsh-autosuggestions
 zsh-syntax-highlighting
 )
 
+# enable fasd for shell
+eval "$(fasd --init auto)"
+
 source $ZSH/oh-my-zsh.sh
 # TODO this is slow
 # autoload -U compinit && compinit
@@ -48,10 +51,15 @@ fi
 
 # p10k config. To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-# TODO this is slow
-# [[ /usr/local/bin/kubectl ]] && source <(kubectl completion zsh)
 
 timezsh() {
   shell=${1-$SHELL}
   for i in $(seq 1 10); do /usr/bin/time $shell -i -c exit; done
 }
+
+### git ###
+alias glg="git log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+"
+# issues only works for git, breaks if folder name different than git repo name
+# alias gpr="bash -c \"open https://github.com/movio/$(basename `git rev-parse --show-toplevel`)/compare/$(git rev-parse --abbrev-ref HEAD)?expand=1\""
+
