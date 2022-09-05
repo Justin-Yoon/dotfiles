@@ -66,12 +66,7 @@ require('packer').startup(function()
   use "ray-x/lsp_signature.nvim" -- show function signature when typing
 
 
-  use({ "jose-elias-alvarez/null-ls.nvim",
-    config = function()
-      require("null-ls").setup({})
-      require("lspconfig")["null-ls"].setup({})
-    end,
-    requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}
+  use({ "jose-elias-alvarez/null-ls.nvim", requires = {"nvim-lua/plenary.nvim", "neovim/nvim-lspconfig"}
   })
   use {
   'abecodes/tabout.nvim',
@@ -106,7 +101,9 @@ vim.opt.updatetime=300 -- Update time for page refresh + audo cmd
 vim.opt.swapfile=false -- no swap files
 vim.opt.splitright=true -- new split on the right
 vim.opt.splitbelow=true -- new split on the bottom
-vim.o.clipboard = 'unnamedplus'
+vim.opt.title=true
+vim.opt.titlestring='nvim %{fnamemodify(getcwd(), ":t")}/%f'
+-- vim.o.clipboard = 'unnamedplus'
 -- Theme --
 -- vim.g.tokyonight_style = "night"
 -- vim.cmd[[colorscheme tokyonight]]
@@ -115,10 +112,10 @@ vim.cmd[[colorscheme onedark]]
 
 -- Mapping
 vim.api.nvim_set_keymap('', '<Space>', '<Leader>', {noremap = false, silent=true})
--- vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
--- vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>y', '"+y', {noremap = false, silent=true})
+vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', 'x', '"_x', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', 'c', '"_c', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('v', '<leader>p', '"_dP', {noremap = true, silent=true})
 -- Quickfix List 
 -- TODO figure these out (replaced by kitty nav)
 vim.api.nvim_set_keymap('n', '<c-n>', ':cnext<cr>zz', {noremap = false, silent=true})
@@ -463,7 +460,7 @@ cmp.setup {
 
 --Set statusbar
 vim.g.lightline = {
-  colorscheme = 'onedark',
+  -- colorscheme = 'onedark',
   active = {
     left = { { 'mode', 'paste' }, { 'readonly', 'relativepath', 'modified' } },
     right = { { 'percent' } }
