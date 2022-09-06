@@ -20,7 +20,12 @@ require('packer').startup(function()
   }
 
   -- Telescope
-  use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}}}
+  use {'nvim-telescope/telescope.nvim',
+    requires = {{'nvim-lua/plenary.nvim'}, {'kyazdani42/nvim-web-devicons'}, { "nvim-telescope/telescope-live-grep-args.nvim" }},
+    config = function()
+      require("telescope").load_extension("live_grep_args")
+    end
+  }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use { "nvim-telescope/telescope-file-browser.nvim" }
   use {
@@ -117,7 +122,6 @@ vim.api.nvim_set_keymap('v', '<leader>y', '"+y', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', 'x', '"_x', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('v', '<leader>p', '"_dP', {noremap = true, silent=true})
 -- Quickfix List 
--- TODO figure these out (replaced by kitty nav)
 vim.api.nvim_set_keymap('n', '<c-n>', ':cnext<cr>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<c-p>', ':cprev<cr>zz', {noremap = false, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>cl', ':ccl<cr>', {noremap = false, silent=true})
@@ -386,7 +390,8 @@ require("telescope").load_extension "file_browser"
 vim.api.nvim_set_keymap('n', '<leader>fb', ':Telescope file_browser path=%:p:h<CR>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fi', ':Telescope find_files<CR>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>b', ':Telescope buffers<cr>', {noremap = true, silent=true})
-vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
+-- vim.api.nvim_set_keymap('n', '<leader>fl', ':Telescope live_grep<cr>', {noremap = true, silent=true})
+vim.api.nvim_set_keymap('n', '<leader>fl', ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>fw', ':Telescope grep_string<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>cm', ':Telescope commands<cr>', {noremap = true, silent=true})
 vim.api.nvim_set_keymap('n', '<leader>ch', ':Telescope command_history<cr>', {noremap = true, silent=true})
