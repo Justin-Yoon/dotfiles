@@ -1,7 +1,17 @@
+export PATH=/opt/homebrew/bin:$PATH
+export PATH=/opt/homebrew/Cellar:$PATH
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-source $(brew --prefix powerlevel10k)/powerlevel10k.zsh-theme
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+# source $(brew --prefix powerlevel10k)/powerlevel10k.zsh-theme
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
@@ -62,4 +72,3 @@ alias glg="git log --graph --abbrev-commit --decorate --format=format:'%C(bold b
 "
 # issues only works for git, breaks if folder name different than git repo name
 # alias gpr="bash -c \"open https://github.com/movio/$(basename `git rev-parse --show-toplevel`)/compare/$(git rev-parse --abbrev-ref HEAD)?expand=1\""
-
